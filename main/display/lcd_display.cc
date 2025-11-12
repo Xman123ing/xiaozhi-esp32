@@ -378,7 +378,11 @@ void LcdDisplay::SetupUI() {
     status_bar_ = lv_obj_create(container_);
     lv_obj_set_size(status_bar_, LV_HOR_RES, LV_SIZE_CONTENT);
     lv_obj_set_style_radius(status_bar_, 0, 0);
-    lv_obj_set_style_bg_color(status_bar_, lvgl_theme->background_color(), 0);
+    // lv_obj_set_style_bg_color(status_bar_, lvgl_theme->background_color(), 0);
+    // 设置渐变色
+    lv_obj_set_style_bg_color(status_bar_, lv_color_hex(0x3B82F6), 0);  // 亮蓝
+    lv_obj_set_style_bg_grad_color(status_bar_, lv_color_hex(0x1E3A8A), 0);  // 深蓝
+    lv_obj_set_style_bg_grad_dir(status_bar_, LV_GRAD_DIR_HOR, 0);  // 水平渐变
     lv_obj_set_style_text_color(status_bar_, lvgl_theme->text_color(), 0);
     
     /* Content - Chat area */

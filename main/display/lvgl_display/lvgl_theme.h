@@ -33,6 +33,7 @@ public:
     inline std::shared_ptr<LvglFont> icon_font() const { return icon_font_; }
     inline std::shared_ptr<LvglFont> large_icon_font() const { return large_icon_font_; }
     inline int spacing(int scale) const { return spacing_ * scale; }
+    inline lv_color_t status_bar_text_color() const { return status_bar_text_color_; }
 
     inline void set_background_color(lv_color_t background) { background_color_ = background; }
     inline void set_text_color(lv_color_t text) { text_color_ = text; }
@@ -48,6 +49,7 @@ public:
     inline void set_text_font(std::shared_ptr<LvglFont> text_font) { text_font_ = text_font; }
     inline void set_icon_font(std::shared_ptr<LvglFont> icon_font) { icon_font_ = icon_font; }
     inline void set_large_icon_font(std::shared_ptr<LvglFont> large_icon_font) { large_icon_font_ = large_icon_font; }
+    inline void set_status_bar_text_color(lv_color_t status_bar_text_color) { status_bar_text_color_ = status_bar_text_color; }
 
 private:
     int spacing_ = 2;
@@ -55,6 +57,7 @@ private:
     // Colors
     lv_color_t background_color_;
     lv_color_t text_color_;
+    lv_color_t status_bar_text_color_;
     lv_color_t chat_background_color_;
     lv_color_t user_bubble_color_;
     lv_color_t assistant_bubble_color_;

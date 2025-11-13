@@ -1,5 +1,7 @@
 #include "lcd_display.h"
+#include "core/lv_obj_style_gen.h"
 #include "gif/lvgl_gif.h"
+#include "misc/lv_color.h"
 #include "settings.h"
 #include "lvgl_theme.h"
 #include "assets/lang_config.h"
@@ -40,6 +42,7 @@ void LcdDisplay::InitializeLcdThemes() {
     light_theme->set_text_font(text_font);
     light_theme->set_icon_font(icon_font);
     light_theme->set_large_icon_font(large_icon_font);
+    light_theme->set_status_bar_text_color(lv_color_hex(0xFFFFFF));     //rgb(255, 255, 255)
 
     // dark theme
     auto dark_theme = new LvglTheme("dark");
@@ -376,22 +379,27 @@ void LcdDisplay::SetupUI() {
 
     /* Status bar */
     status_bar_ = lv_obj_create(container_);
-    lv_obj_set_size(status_bar_, LV_HOR_RES, LV_SIZE_CONTENT);
-    lv_obj_set_style_radius(status_bar_, 0, 0);
-    // lv_obj_set_style_bg_color(status_bar_, lvgl_theme->background_color(), 0);
-    // 设置渐变色
-    lv_obj_set_style_bg_color(status_bar_, lv_color_hex(0x3B82F6), 0);  // 亮蓝
-    lv_obj_set_style_bg_grad_color(status_bar_, lv_color_hex(0x1E3A8A), 0);  // 深蓝
-    lv_obj_set_style_bg_grad_dir(status_bar_, LV_GRAD_DIR_HOR, 0);  // 水平渐变
-    lv_obj_set_style_text_color(status_bar_, lvgl_theme->text_color(), 0);
+    // 使用百分比宽度而不是绝对像素宽度，这样外边距才能正常工作
+    lv_obj_set_width(status_bar_, lv_pct(100));  // 宽度自适应，会自动减去外边距
+    lv_obj_set_height(status_bar_, LV_SIZE_CONTENT);
+    lv_obj_set_style_min_height(status_bar_, 45, 0);  // 设置最小高度，增加视觉冲击力
+    // 设置圆角
+    lv_obj_set_style_radius(status_bar_, lvgl_theme->spacing(6), 0);
+    lv_obj_set_style_bg_color(status_bar_, lv_color_hex(0x000000), 0);  // 黑色
+    // lv_obj_set_style_bg_grad_color(status_bar_, lv_color_hex(0xB4EEB4), 0);  // 亮绿
+    // lv_obj_set_style_bg_grad_dir(status_bar_, LV_GRAD_DIR_VER, 0);  // 水平渐变
+    lv_obj_set_style_text_color(status_bar_, lvgl_theme->status_bar_text_color(), 0);
     
     /* Content - Chat area */
     content_ = lv_obj_create(container_);
-    lv_obj_set_style_radius(content_, 0, 0);
+    lv_obj_set_style_radius(content_, lvgl_theme->spacing(6), 0);
     lv_obj_set_width(content_, LV_HOR_RES);
     lv_obj_set_flex_grow(content_, 1);
     lv_obj_set_style_pad_all(content_, lvgl_theme->spacing(4), 0);
-    lv_obj_set_style_border_width(content_, 0, 0);
+    lv_obj_set_style_border_width(content_, 4, 0);
+    // lv_obj_set_style_border_color(content_, lv_color_hex(0xE51553), 0);
+    lv_obj_set_style_shadow_color(content_, lv_color_hex(0x00FF00), 0);
+    lv_obj_set_style_shadow_width(content_, 50, 0);
     lv_obj_set_style_bg_color(content_, lvgl_theme->chat_background_color(), 0); // Background for chat area
 
     // Enable scrolling for chat content
@@ -409,12 +417,15 @@ void LcdDisplay::SetupUI() {
     /* Status bar */
     lv_obj_set_flex_flow(status_bar_, LV_FLEX_FLOW_ROW);
     lv_obj_set_style_pad_all(status_bar_, 0, 0);
-    lv_obj_set_style_border_width(status_bar_, 0, 0);
+    // 设置边框样式
+    lv_obj_set_style_border_width(status_bar_, 2, 0);
     lv_obj_set_style_pad_column(status_bar_, 0, 0);
-    lv_obj_set_style_pad_top(status_bar_, lvgl_theme->spacing(2), 0);
-    lv_obj_set_style_pad_bottom(status_bar_, lvgl_theme->spacing(2), 0);
+    lv_obj_set_style_pad_top(status_bar_, lvgl_theme->spacing(6), 0);     // 增加上内边距
+    lv_obj_set_style_pad_bottom(status_bar_, lvgl_theme->spacing(6), 0);  // 增加下内边距，保持对称
     lv_obj_set_style_pad_left(status_bar_, lvgl_theme->spacing(4), 0);
     lv_obj_set_style_pad_right(status_bar_, lvgl_theme->spacing(4), 0);
+    // 设置外边距
+    lv_obj_set_style_margin_bottom(status_bar_, lvgl_theme->spacing(4), 0);
     lv_obj_set_scrollbar_mode(status_bar_, LV_SCROLLBAR_MODE_OFF);
     // 设置状态栏的内容垂直居中
     lv_obj_set_flex_align(status_bar_, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -422,12 +433,12 @@ void LcdDisplay::SetupUI() {
     network_label_ = lv_label_create(status_bar_);
     lv_label_set_text(network_label_, "");
     lv_obj_set_style_text_font(network_label_, icon_font, 0);
-    lv_obj_set_style_text_color(network_label_, lvgl_theme->text_color(), 0);
+    lv_obj_set_style_text_color(network_label_, lvgl_theme->status_bar_text_color(), 0);
 
     notification_label_ = lv_label_create(status_bar_);
     lv_obj_set_flex_grow(notification_label_, 1);
     lv_obj_set_style_text_align(notification_label_, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_color(notification_label_, lvgl_theme->text_color(), 0);
+    lv_obj_set_style_text_color(notification_label_, lvgl_theme->status_bar_text_color(), 0);
     lv_label_set_text(notification_label_, "");
     lv_obj_add_flag(notification_label_, LV_OBJ_FLAG_HIDDEN);
 
@@ -435,18 +446,18 @@ void LcdDisplay::SetupUI() {
     lv_obj_set_flex_grow(status_label_, 1);
     lv_label_set_long_mode(status_label_, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_style_text_align(status_label_, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_color(status_label_, lvgl_theme->text_color(), 0);
+    lv_obj_set_style_text_color(status_label_, lvgl_theme->status_bar_text_color(), 0);
     lv_label_set_text(status_label_, Lang::Strings::INITIALIZING);
     
     mute_label_ = lv_label_create(status_bar_);
     lv_label_set_text(mute_label_, "");
     lv_obj_set_style_text_font(mute_label_, icon_font, 0);
-    lv_obj_set_style_text_color(mute_label_, lvgl_theme->text_color(), 0);
+    lv_obj_set_style_text_color(mute_label_, lvgl_theme->status_bar_text_color(), 0);
 
     battery_label_ = lv_label_create(status_bar_);
     lv_label_set_text(battery_label_, "");
     lv_obj_set_style_text_font(battery_label_, icon_font, 0);
-    lv_obj_set_style_text_color(battery_label_, lvgl_theme->text_color(), 0);
+    lv_obj_set_style_text_color(battery_label_, lvgl_theme->status_bar_text_color(), 0);
     lv_obj_set_style_margin_left(battery_label_, lvgl_theme->spacing(2), 0); // 添加左边距，与前面的元素分隔
 
     low_battery_popup_ = lv_obj_create(screen);
@@ -1025,20 +1036,22 @@ void LcdDisplay::SetTheme(Theme* theme) {
         lv_obj_set_style_bg_color(container_, lvgl_theme->background_color(), 0);
     }
     
+    // 确保status_bar_的样式始终一致
     // Update status bar background color with 50% opacity
-    lv_obj_set_style_bg_opa(status_bar_, LV_OPA_50, 0);
-    lv_obj_set_style_bg_color(status_bar_, lvgl_theme->background_color(), 0);
+    // lv_obj_set_style_bg_opa(status_bar_, LV_OPA_50, 0);
+    // lv_obj_set_style_bg_color(status_bar_, lvgl_theme->background_color(), 0);
     
     // Update status bar elements
-    lv_obj_set_style_text_color(network_label_, lvgl_theme->text_color(), 0);
-    lv_obj_set_style_text_color(status_label_, lvgl_theme->text_color(), 0);
-    lv_obj_set_style_text_color(notification_label_, lvgl_theme->text_color(), 0);
-    lv_obj_set_style_text_color(mute_label_, lvgl_theme->text_color(), 0);
-    lv_obj_set_style_text_color(battery_label_, lvgl_theme->text_color(), 0);
+    // status bar的子节点的text_color保持不变
+    // lv_obj_set_style_text_color(network_label_, lvgl_theme->status_bar_text_color(), 0);
+    // lv_obj_set_style_text_color(status_label_, lvgl_theme->status_bar_text_color(), 0);
+    // lv_obj_set_style_text_color(notification_label_, lvgl_theme->status_bar_text_color(), 0);
+    // lv_obj_set_style_text_color(mute_label_, lvgl_theme->status_bar_text_color(), 0);
+    // lv_obj_set_style_text_color(battery_label_, lvgl_theme->status_bar_text_color(), 0);
     lv_obj_set_style_text_color(emoji_label_, lvgl_theme->text_color(), 0);
 
     // Set content background opacity
-    lv_obj_set_style_bg_opa(content_, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_bg_opa(content_, LV_OPA_60, 0);
 
     // If we have the chat message style, update all message bubbles
 #if CONFIG_USE_WECHAT_MESSAGE_STYLE
